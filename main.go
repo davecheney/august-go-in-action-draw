@@ -60,11 +60,18 @@ func main() {
 	log.Println("Collating results")
 	time.Sleep(1500 * time.Millisecond)
 	punters := filter(result)
+
+	log.Println("Seeding random numbers")
+	time.Sleep(1 * time.Second)
+	rand.Seed(time.Now().Unix())
+
 	log.Println("Shuffling")
 	time.Sleep(2 * time.Second)
 	shuffle(punters)
+
 	log.Println("Pausing for dramatic effect")
 	time.Sleep(3 * time.Second)
+
 	fmt.Println("And the winner is ...")
 	time.Sleep(1500 * time.Millisecond)
 	figlet(punters[0])
