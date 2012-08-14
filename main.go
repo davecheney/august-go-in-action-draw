@@ -3,20 +3,43 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	stdlog "log"
+	"log"
+	"math/rand"
 	"net/http"
 	"os"
+	"os/exec"
+	"time"
 )
 
-const eventid = 75463782
+const (
+	// http://www.meetup.com/golang-syd/events/75463782/
+	eventid = 75463782
 
-var log = stdlog.New(os.Stdout, os.Args[0], 0)
+	// how many exchanges
+	shuffles = 9001
+)
 
+// filter names from the json blob meetup gives us
 func filter(m map[string]interface{}) (result []string) {
 	for _, v := range m["results"].([]interface{}) {
 		result = append(result, v.(map[string]interface{})["member"].(map[string]interface{})["name"].(string))
 	}
-	return 
+	return
+}
+
+// shuffle the deck
+func shuffle(punters []string) {
+	for i := 0; i < shuffles; i++ {
+		a, b := rand.Intn(len(punters)), rand.Intn(len(punters))
+		punters[a], punters[b] = punters[b], punters[a]
+	}
+}
+
+// because things are funnier when they are piped through figlet
+func figlet(name string) error {
+	cmd := exec.Command("/usr/bin/figlet", name)
+	cmd.Stdout = os.Stdout
+	return cmd.Run()
 }
 
 func main() {
@@ -34,6 +57,15 @@ func main() {
 	if err := decoder.Decode(&result); err != nil {
 		log.Fatalf("Aww snap, that doesn't look like json: %v", err)
 	}
+	log.Println("Collating results")
+	time.Sleep(1500 * time.Millisecond)
 	punters := filter(result)
-	fmt.Println(punters)
+	log.Println("Shuffling")
+	time.Sleep(2 * time.Second)
+	shuffle(punters)
+	log.Println("Pausing for dramatic effect")
+	time.Sleep(3 * time.Second)
+	fmt.Println("And the winner is ...")
+	time.Sleep(1500 * time.Millisecond)
+	figlet(punters[0])
 }
